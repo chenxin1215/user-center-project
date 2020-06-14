@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+database:
+  username: root
+  password: root
+  host: 106.15.248.104
+  port: 3306
+  dbname: db_blog
+logging:
+  config: classpath:log4j2-product.yml
+dubbo:
+  registry:
+    address: zookeeper://106.15.248.104:2181
+swagger-enabled: false

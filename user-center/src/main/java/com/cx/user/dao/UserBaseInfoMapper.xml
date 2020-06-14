@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cx.user.dao.UserBaseInfoMapper">
+
+    <sql id="Base_Query_Condition">
+        <if test="condition.keyword != null and condition.keyword != ''">
+            and (
+            nick_name like concat('%',TRIM(#{condition.keyword}),'%')
+            or user_mobile like concat('%',TRIM(#{condition.keyword}),'%')
+            )
+        </if>
+    </sql>
+
+    <sql id="Page_Query">
+        <if test="page != null and pageSize!=null">
+            limit ${offset}, ${pageSize}
+        </if>
+    </sql>
+
+    <select id="queryUserBaseInfoList" resultType="com.cx.user.entity.UserBaseInfo">
+        select *
+        from user_base_info
+        <where>
+            user_status = 1
+            <include refid="Base_Query_Condition"/>
+        </where>
+        <include refid="Page_Query"/>
+    </select>
+
+    <!--Mybatis plus 分页查询-->
+    <select id="pageQueryUserBaseInfoList" resultType="com.cx.user.entity.UserBaseInfo">
+        select *
+        from user_base_info
+        <where>
+            user_status = 1
+            <include refid="Base_Query_Condition"/>
+        </where>
+    </select>
+
+</mapper>
