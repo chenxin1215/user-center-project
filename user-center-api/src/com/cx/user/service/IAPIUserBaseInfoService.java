@@ -47,6 +47,14 @@ public interface IAPIUserBaseInfoService {
     UserBaseInfo getUserBaseInfoByLoginName(String userName);
 
     /**
+     * @Description: 根据手机号获取用户
+     * @Author: chenxin
+     * @Param: [userName]
+     * @Date: 2020/6/14
+     */
+    UserBaseInfo getUserBaseInfoByMobile(String mobile);
+
+    /**
      * @Description: 查询用户列表
      * @Author: chenxin
      * @Param: [condition]

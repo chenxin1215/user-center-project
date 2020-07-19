@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cx.user.dao.SysMenuMapper">
+    <resultMap id="BaseResultMap" type="com.cx.user.entity.SysMenu">
+        <id column="menu_id" jdbcType="BIGINT" property="menuId"/>
+        <result column="menu_name" jdbcType="VARCHAR" property="menuName"/>
+        <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+        <result column="order_num" jdbcType="INTEGER" property="orderNum"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="component" jdbcType="VARCHAR" property="component"/>
+        <result column="menu_type" jdbcType="CHAR" property="menuType"/>
+        <result column="visible" jdbcType="BIT" property="visible"/>
+        <result column="perms" jdbcType="VARCHAR" property="perms"/>
+        <result column="icon" jdbcType="VARCHAR" property="icon"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="update_user_id" jdbcType="BIGINT" property="updateUserId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    menu_id, menu_name, parent_id, order_num, url, `path`, component, menu_type, visible,
+    perms, icon, remark, create_user_id, update_user_id, create_time, update_time
+  </sql>
+
+    <select id="selectMenuTreeAll" resultType="com.jxzj.insure.user.entity.SysMenu">
+        select distinct m.menu_id, m.parent_id, m.menu_name, m.path,
+        m.component, m.visible, ifnull(m.perms,'') as perms, m.menu_type, m.icon, m.order_num,
+        m.create_time
+        from sys_menu
+        m where m.menu_type in ('M', 'C')
+        order by m.parent_id, m.order_num
+    </select>
+
+    <select id="selectMenuTreeByUserId" parameterType="Long" resultType="com.jxzj.insure.user.entity.SysMenu">
+        select distinct m.menu_id, m.parent_id,
+        m.menu_name, m.path, m.component, m.visible, ifnull(m.perms,'') as perms, m.is_frame, m.menu_type,
+        m.icon,
+        m.order_num, m.create_time
+        from sys_menu m
+        left join sys_role_menu rm on m.menu_id = rm.menu_id
+        left join
+        sys_user_role ur on rm.role_id = ur.role_id
+        left join sys_role ro on ur.role_id = ro.role_id
+        left join sys_user u
+        on ur.user_id = u.user_id
+        where u.user_id = #{userId} and m.menu_type in ('M', 'C')
+        AND ro.status
+        = 0
+        order by m.parent_id, m.order_num
+    </select>
+
+
+    <select id="selectMenuPermsByUserId" parameterType="Long" resultType="String">
+        select distinct m.perms
+        from sys_menu m
+        left join sys_role_menu rm on m.menu_id = rm.menu_id
+        left join sys_user_role ur on rm.role_id = ur.role_id
+        left
+        join sys_role r on r.role_id = ur.role_id
+        where r.status = '0' and ur.user_id = #{userId}
+    </select>
+
+</mapper>

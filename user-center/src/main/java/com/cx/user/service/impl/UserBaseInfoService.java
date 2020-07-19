@@ -1,6 +1,7 @@
 package com.cx.user.service.impl;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -33,7 +34,13 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
 
     @Override
     public Long addUser(UserBaseInfo userBaseInfo) {
-        return null;
+        // TODO 检查用户名是否唯一
+
+        // TODO 需要检查手机号与邮箱的格式与唯一性
+
+        userBaseInfoMapper.insert(userBaseInfo);
+
+        return userBaseInfo.getUserId();
     }
 
     @Override
@@ -65,15 +72,30 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
     @Override
     public UserBaseInfo getUserBaseInfoByLoginName(String userName) {
         System.out.println("### getUserBaseInfoByLoginName start userName:" + userName);
-        if (userName == null || userName.equals("")) {
+        if (StringUtils.isBlank(userName)) {
             LOGGER.warn("getUserBaseInfoByLoginName 查询条件为空！");
             return null;
         }
         LambdaQueryWrapper<UserBaseInfo> queryWrapper = new LambdaQueryWrapper<>();
-        // 手机号或者登陆名
-        queryWrapper.eq(UserBaseInfo::getUserMobile, userName).or().eq(UserBaseInfo::getLoginName, userName);
+        // 登陆名
+        queryWrapper.eq(UserBaseInfo::getLoginName, userName);
 
         System.out.println("### getUserBaseInfoByLoginName end");
+        return userBaseInfoMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public UserBaseInfo getUserBaseInfoByMobile(String mobile) {
+        System.out.println("### getUserBaseInfoByMobile start mobile:" + mobile);
+        if (StringUtils.isBlank(mobile)) {
+            LOGGER.warn("getUserBaseInfoByMobile 查询条件为空！");
+            return null;
+        }
+        LambdaQueryWrapper<UserBaseInfo> queryWrapper = new LambdaQueryWrapper<>();
+        // 手机号
+        queryWrapper.eq(UserBaseInfo::getUserMobile, mobile);
+
+        System.out.println("### getUserBaseInfoByMobile end");
         return userBaseInfoMapper.selectOne(queryWrapper);
     }
 
@@ -116,7 +138,13 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
 
     @Override
     public void resetPassword(String encode, Long userId) {
+        Objects.requireNonNull(userId, "userId cannot be null");
+        Objects.requireNonNull(encode, "password cannot be null");
 
+        UserBaseInfo userBaseInfo = new UserBaseInfo();
+        userBaseInfo.setUserId(userId);
+        userBaseInfo.setLoginPassword(encode);
+        userBaseInfoMapper.updateById(userBaseInfo);
     }
 
     @Override

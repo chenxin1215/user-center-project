@@ -26,6 +26,11 @@ public class UserBaseInfo implements Serializable {
     private String nickName;
 
     /**
+     * 性别：0-女，1-男
+     */
+    private Integer sex;
+
+    /**
      * 用户电话
      */
     private String userMobile;
@@ -51,9 +56,19 @@ public class UserBaseInfo implements Serializable {
     private Date createTime;
 
     /**
+     * 创建人
+     */
+    private Long createUserId;
+
+    /**
      * 修改时间
      */
     private Date updateTime;
+
+    /**
+     * 修改人
+     */
+    private Long updateUserId;
 
     public Long getUserId() {
         return userId;
@@ -117,5 +132,29 @@ public class UserBaseInfo implements Serializable {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Integer getSex() {
+        return sex;
+    }
+
+    public void setSex(Integer sex) {
+        this.sex = sex;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
+    }
+
+    public Long getUpdateUserId() {
+        return updateUserId;
+    }
+
+    public void setUpdateUserId(Long updateUserId) {
+        this.updateUserId = updateUserId;
     }
 }
