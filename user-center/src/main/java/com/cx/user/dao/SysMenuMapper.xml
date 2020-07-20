@@ -25,7 +25,7 @@
     perms, icon, remark, create_user_id, update_user_id, create_time, update_time
   </sql>
 
-    <select id="selectMenuTreeAll" resultType="com.jxzj.insure.user.entity.SysMenu">
+    <select id="selectMenuTreeAll" resultType="com.cx.user.entity.SysMenu">
         select distinct m.menu_id, m.parent_id, m.menu_name, m.path,
         m.component, m.visible, ifnull(m.perms,'') as perms, m.menu_type, m.icon, m.order_num,
         m.create_time
@@ -34,7 +34,7 @@
         order by m.parent_id, m.order_num
     </select>
 
-    <select id="selectMenuTreeByUserId" parameterType="Long" resultType="com.jxzj.insure.user.entity.SysMenu">
+    <select id="selectMenuTreeByUserId" parameterType="Long" resultType="com.cx.user.entity.SysMenu">
         select distinct m.menu_id, m.parent_id,
         m.menu_name, m.path, m.component, m.visible, ifnull(m.perms,'') as perms, m.is_frame, m.menu_type,
         m.icon,
