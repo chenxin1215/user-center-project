@@ -5,16 +5,22 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.cx.user.dao.RelUserRoleMapper;
 import com.cx.user.dao.UserBaseInfoMapper;
+import com.cx.user.dto.request.SaveUserRequest;
 import com.cx.user.dto.request.QueryUserBaseInfoCondition;
 import com.cx.user.dto.response.UserShowInfo;
+import com.cx.user.entity.RelUserRole;
 import com.cx.user.entity.UserBaseInfo;
 import com.cx.user.enums.UserStatusEnum;
 import com.cx.user.service.IAPIUserBaseInfoService;
+import com.sun.xml.internal.ws.server.ServerRtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,23 +38,84 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
     @Autowired
     private UserBaseInfoMapper userBaseInfoMapper;
 
+    @Autowired
+    private RelUserRoleMapper relUserRoleMapper;
+
     @Override
-    public Long addUser(UserBaseInfo userBaseInfo) {
-        // TODO 检查用户名是否唯一
+    @Transactional
+    public Long addUser(SaveUserRequest request) {
 
-        // TODO 需要检查手机号与邮箱的格式与唯一性
+        // 检查数据
+        checkAddUserRequest(request);
 
-        userBaseInfoMapper.insert(userBaseInfo);
+        // 新增用户
+        UserBaseInfo addUser = new UserBaseInfo();
+        BeanUtils.copyProperties(addUser, request);
+        addUser.setCreateUserId(request.getOperationUserId());
+        addUser.setUpdateUserId(request.getOperationUserId());
+        userBaseInfoMapper.insert(addUser);
+        Long userId = addUser.getUserId();
 
-        return userBaseInfo.getUserId();
+        // 处理角色关系
+        for (Long roleId : request.getRoleIdList()) {
+            RelUserRole rel = new RelUserRole();
+            rel.setRoleId(roleId);
+            rel.setUserId(userId);
+            relUserRoleMapper.insert(rel);
+        }
+
+        return userId;
+    }
+
+    /**
+     * 检查新增用户数据
+     */
+    private void checkAddUserRequest(SaveUserRequest request) {
+        String loginName = request.getLoginName();
+        String userMobile = request.getUserMobile();
+        String loginPassword = request.getLoginPassword();
+        Long operationUserId = request.getOperationUserId();
+        List<Long> roleIdList = request.getRoleIdList();
+
+        Assert.notNull(loginName, "登陆名不能为空");
+        Assert.notNull(userMobile, "电话不能为空");
+        Assert.notNull(loginPassword, "密码不能为空");
+        Assert.notNull(operationUserId, "操作人不能为空");
+        Assert.notEmpty(roleIdList, "用户角色不能为空");
+
+        Integer count = userBaseInfoMapper
+            .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getLoginName, loginName));
+        if (count > 0) {
+            LOGGER.error("登陆名已存在！");
+            throw new ServerRtException("登陆名已存在");
+        }
+
+        count = userBaseInfoMapper
+            .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getUserMobile, userMobile));
+        if (count > 0) {
+            LOGGER.error("手机号已注册！");
+            throw new ServerRtException("手机号已注册");
+        }
+
+        String nickname = request.getNickname();
+        if (!StringUtils.isBlank(nickname)) {
+            count = userBaseInfoMapper
+                .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getNickname, nickname));
+            if (count > 0) {
+                LOGGER.error("昵称已存在！");
+                throw new ServerRtException("昵称已存在");
+            }
+        } else {
+            request.setNickname(loginName);
+        }
     }
 
     @Override
     public UserBaseInfo getUserBaseInfoById(Long userId) {
-        if (userId == null) {
-            LOGGER.warn("getUserBaseInfoById 查询id为空！");
-            return null;
-        }
+        // if (userId == null) {
+        // LOGGER.warn("getUserBaseInfoById 查询id为空！");
+        // return null;
+        // }
 
         return userBaseInfoMapper.selectById(userId);
     }
@@ -132,8 +199,49 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
     }
 
     @Override
-    public Long updateUserBaseInfo(UserBaseInfo userBaseInfo) {
-        return null;
+    @Transactional
+    public void updateUserBaseInfo(SaveUserRequest request) {
+        Long userId = request.getUserId();
+        Assert.notNull(userId, "用户id不能为空");
+        List<Long> roleIdList = request.getRoleIdList();
+        Assert.notEmpty(roleIdList, "角色列表不能为空");
+
+        UserBaseInfo userBaseInfo = userBaseInfoMapper.selectById(userId);
+        if (userBaseInfo == null) {
+            throw new ServerRtException("用户不存在！");
+        }
+
+        String nickname = request.getNickname();
+        if (!StringUtils.isBlank(nickname) && !userBaseInfo.getNickname().equals(nickname)) {
+            Integer count = userBaseInfoMapper
+                .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getNickname, nickname));
+            if (count > 0) {
+                throw new ServerRtException("昵称已存在");
+            }
+        }
+
+        String userMobile = request.getUserMobile();
+        if (!StringUtils.isBlank(userMobile) && !userBaseInfo.getUserMobile().equals(userMobile)) {
+            Integer count = userBaseInfoMapper
+                .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getUserMobile, userMobile));
+            if (count > 0) {
+                throw new ServerRtException("手机号已存在");
+            }
+        }
+
+        UserBaseInfo updateUser = new UserBaseInfo();
+        BeanUtils.copyProperties(request, updateUser);
+        updateUser.setUpdateUserId(request.getOperationUserId());
+        userBaseInfoMapper.updateById(updateUser);
+
+        relUserRoleMapper.delete(new LambdaQueryWrapper<RelUserRole>().eq(RelUserRole::getUserId, userId));
+        for (Long roleId : roleIdList) {
+            RelUserRole rel = new RelUserRole();
+            rel.setRoleId(roleId);
+            rel.setUserId(userId);
+            relUserRoleMapper.insert(rel);
+        }
+
     }
 
     @Override
@@ -149,6 +257,6 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
 
     @Override
     public void deleteUser(Long userId) {
-
+        // TODO
     }
 }

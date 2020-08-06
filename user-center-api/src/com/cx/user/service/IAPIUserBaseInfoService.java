@@ -1,6 +1,7 @@
 package com.cx.user.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.cx.user.dto.request.SaveUserRequest;
 import com.cx.user.dto.request.QueryUserBaseInfoCondition;
 import com.cx.user.dto.response.UserShowInfo;
 import com.cx.user.entity.UserBaseInfo;
@@ -20,7 +21,7 @@ public interface IAPIUserBaseInfoService {
      * @Param: [userBaseInfo]
      * @Date: 2020/6/14
      */
-    Long addUser(UserBaseInfo userBaseInfo);
+    Long addUser(SaveUserRequest request);
 
     /**
      * @Description: 根据用户id获取用户
@@ -36,7 +37,7 @@ public interface IAPIUserBaseInfoService {
      * @Param: [userIdList]
      * @Date: 2020/6/14
      */
-    Map<Long,UserBaseInfo> BatchGetUserBaseInfoById(List<Long> userIdList);
+    Map<Long, UserBaseInfo> BatchGetUserBaseInfoById(List<Long> userIdList);
 
     /**
      * @Description: 根据登陆名获取用户
@@ -76,7 +77,7 @@ public interface IAPIUserBaseInfoService {
      * @Param: [userBaseInfo]
      * @Date: 2020/6/14
      */
-    Long updateUserBaseInfo(UserBaseInfo userBaseInfo);
+    void updateUserBaseInfo(SaveUserRequest request);
 
     /**
      * @Description: 重置密码

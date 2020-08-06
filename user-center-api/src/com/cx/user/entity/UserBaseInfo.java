@@ -23,7 +23,7 @@ public class UserBaseInfo implements Serializable {
     /**
      * 用户昵称
      */
-    private String nickName;
+    private String nickname;
 
     /**
      * 性别：0-女，1-男
@@ -78,12 +78,12 @@ public class UserBaseInfo implements Serializable {
         this.userId = userId;
     }
 
-    public String getNickName() {
-        return nickName;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getUserMobile() {

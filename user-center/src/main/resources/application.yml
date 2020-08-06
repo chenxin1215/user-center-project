@@ -1,6 +1,6 @@
 spring:
   profiles:
-    # dev | product | test
+    # dev | product
     active: dev
   datasource:
     name: ${database.dbname}
@@ -14,7 +14,7 @@ spring:
       max-lifetime: 3600000
 mybatis:
   mapper-locations:
-  - classpath:com/cx/user/dao/*.xml
+    - classpath:com/cx/user/dao/*.xml
   type-aliases-package: com.cx.user.entity
 dubbo:
   application:
@@ -29,6 +29,6 @@ dubbo:
     id: cx-registry
   scan:
     base-packages:
-    - com.cx.user.service
-    - com.cx.user.common
+      - com.cx.user.service
+      - com.cx.user.common
 

@@ -5,14 +5,14 @@
     <sql id="Base_Query_Condition">
         <if test="condition.keyword != null and condition.keyword != ''">
             and (
-            nick_name like concat('%',TRIM(#{condition.keyword}),'%')
+            nickname like concat('%',TRIM(#{condition.keyword}),'%')
             or user_mobile like concat('%',TRIM(#{condition.keyword}),'%')
             )
         </if>
     </sql>
 
     <sql id="Page_Query">
-        <if test="page != null and pageSize!=null">
+        <if test="condition.page != null and condition.pageSize != null">
             limit ${offset}, ${pageSize}
         </if>
     </sql>
