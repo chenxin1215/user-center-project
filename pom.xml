@@ -7,7 +7,7 @@
     <groupId>com.cx.user</groupId>
     <artifactId>user-center-project</artifactId>
     <version>1.0.0</version>
-
+    <packaging>pom</packaging>
     <name>User Center Project</name>
     <description>底层服务-用户中心</description>
 
@@ -20,5 +20,4 @@
         <name>blog</name>
         <url>https://chenxin1215.com/</url>
     </organization>
-
 </project>

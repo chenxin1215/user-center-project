@@ -12,5 +12,5 @@ logging:
   config: classpath:log4j2-product.yml
 dubbo:
   registry:
-    address: zookeeper://106.15.248.104:2181
+    address: zookeeper://172.17.43.184:2181
 swagger-enabled: false
