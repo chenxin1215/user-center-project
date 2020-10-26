@@ -3,10 +3,16 @@ spring:
     hikari:
       maximum-pool-size: 2
 database:
+#  username: root
+#  password: root
+#  host: localhost
+#  port: 3306
+
   username: root
   password: root
   host: 106.15.248.104
   port: 3306
+
   dbname: db_blog
 logging:
   config: classpath:log4j2-dev.yml

@@ -29,8 +29,8 @@
         select distinct m.menu_id, m.parent_id, m.menu_name, m.path,
         m.component, m.visible, ifnull(m.perms,'') as perms, m.menu_type, m.icon, m.order_num,
         m.create_time
-        from sys_menu
-        m where m.menu_type in ('M', 'C')
+        from sys_menu m
+        where m.menu_type in ('M', 'C')
         order by m.parent_id, m.order_num
     </select>
 
@@ -40,11 +40,10 @@
         m.icon,
         m.order_num, m.create_time
         from sys_menu m
-        left join sys_role_menu rm on m.menu_id = rm.menu_id
-        left join
-        sys_user_role ur on rm.role_id = ur.role_id
-        left join sys_role ro on ur.role_id = ro.role_id
-        left join sys_user u
+        left join rel_role_menu rm on m.menu_id = rm.menu_id
+        left join rel_user_role ur on rm.role_id = ur.role_id
+        left join user_role ro on ur.role_id = ro.role_id
+        left join user_base_info u
         on ur.user_id = u.user_id
         where u.user_id = #{userId} and m.menu_type in ('M', 'C')
         AND ro.status
@@ -56,10 +55,9 @@
     <select id="selectMenuPermsByUserId" parameterType="Long" resultType="String">
         select distinct m.perms
         from sys_menu m
-        left join sys_role_menu rm on m.menu_id = rm.menu_id
-        left join sys_user_role ur on rm.role_id = ur.role_id
-        left
-        join sys_role r on r.role_id = ur.role_id
+        left join rel_role_menu rm on m.menu_id = rm.menu_id
+        left join rel_user_role ur on rm.role_id = ur.role_id
+        left join user_role r on r.role_id = ur.role_id
         where r.status = '0' and ur.user_id = #{userId}
     </select>
 

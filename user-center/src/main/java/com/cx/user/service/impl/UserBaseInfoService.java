@@ -7,14 +7,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cx.user.dao.RelUserRoleMapper;
 import com.cx.user.dao.UserBaseInfoMapper;
-import com.cx.user.dto.request.SaveUserRequest;
 import com.cx.user.dto.request.QueryUserBaseInfoCondition;
+import com.cx.user.dto.request.SaveUserRequest;
 import com.cx.user.dto.response.UserShowInfo;
 import com.cx.user.entity.RelUserRole;
 import com.cx.user.entity.UserBaseInfo;
 import com.cx.user.enums.UserStatusEnum;
 import com.cx.user.service.IAPIUserBaseInfoService;
-import com.sun.xml.internal.ws.server.ServerRtException;
+import com.cx.utils.exception.BizRtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -50,7 +50,7 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
 
         // 新增用户
         UserBaseInfo addUser = new UserBaseInfo();
-        BeanUtils.copyProperties(addUser, request);
+        BeanUtils.copyProperties(request, addUser);
         addUser.setCreateUserId(request.getOperationUserId());
         addUser.setUpdateUserId(request.getOperationUserId());
         userBaseInfoMapper.insert(addUser);
@@ -87,14 +87,14 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
             .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getLoginName, loginName));
         if (count > 0) {
             LOGGER.error("登陆名已存在！");
-            throw new ServerRtException("登陆名已存在");
+            throw new BizRtException(null, "登陆名已存在");
         }
 
         count = userBaseInfoMapper
             .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getUserMobile, userMobile));
         if (count > 0) {
             LOGGER.error("手机号已注册！");
-            throw new ServerRtException("手机号已注册");
+            throw new BizRtException(null, "手机号已注册");
         }
 
         String nickname = request.getNickname();
@@ -103,7 +103,7 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
                 .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getNickname, nickname));
             if (count > 0) {
                 LOGGER.error("昵称已存在！");
-                throw new ServerRtException("昵称已存在");
+                throw new BizRtException(null, "昵称已存在");
             }
         } else {
             request.setNickname(loginName);
@@ -208,7 +208,7 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
 
         UserBaseInfo userBaseInfo = userBaseInfoMapper.selectById(userId);
         if (userBaseInfo == null) {
-            throw new ServerRtException("用户不存在！");
+            throw new BizRtException(null, "用户不存在！");
         }
 
         String nickname = request.getNickname();
@@ -216,7 +216,7 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
             Integer count = userBaseInfoMapper
                 .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getNickname, nickname));
             if (count > 0) {
-                throw new ServerRtException("昵称已存在");
+                throw new BizRtException(null, "昵称已存在");
             }
         }
 
@@ -225,7 +225,7 @@ public class UserBaseInfoService implements IAPIUserBaseInfoService {
             Integer count = userBaseInfoMapper
                 .selectCount(new LambdaQueryWrapper<UserBaseInfo>().eq(UserBaseInfo::getUserMobile, userMobile));
             if (count > 0) {
-                throw new ServerRtException("手机号已存在");
+                throw new BizRtException(null, "手机号已存在");
             }
         }
 
